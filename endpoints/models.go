@@ -1,5 +1,25 @@
 package endpoints
 
+
+
+type MoviesDb interface {
+	GetMovie(id int) (*Movie,error)
+	CreateMovie(movie *Movie) (*Movie,error)
+	DeleteMovie(id int) error
+
+	GetUser(id int)	(*UserMovies,error)
+	CreateUser(user *UserMovies) (*UserMovies,error)
+	UpdateUser(id int,user *UserMovies) (*UserMovies,error)
+
+
+}
+
+type UserMovies struct {
+	ID 				int 	`json:"id"`
+	MoviesList			string	`json:"movies_list"`
+}
+
+
 type Movie struct {
 	Title 				string 	`json:"title"`
 	ID 					int 	`json:"id"`

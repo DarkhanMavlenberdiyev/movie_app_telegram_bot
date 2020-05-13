@@ -35,11 +35,23 @@ func StartBot(d *cli.Context) error {
 		log.Fatal(err)
 		return err
 	}
+	user := endpoints.PostgreConfig{
+		User:     "postgres",
+		Password: "daha2000",
+		Port:     "5432", //5432
+		Host:     "127.0.0.1",
+	}
+	db := endpoints.NewPostgreBot(user)
+	endpoint := endpoints.NewEndpointsFactory(db)
 
-	b.Handle("/start",endpoints.Start(b))
-	b.Handle(&endpoints.PopularTvKey,endpoints.GetPopularTv(b))
-	b.Handle(&endpoints.NextTV,endpoints.NextPopularTv(b))
-	b.Handle(&endpoints.PrevTV,endpoints.PrevPopularTv(b))
+	b.Handle("/start",endpoint.Start(b))
+	b.Handle(&endpoints.PopularTvKey,endpoint.GetPopularTv(b))
+	b.Handle(&endpoints.NextTV,endpoint.NextPopularTv(b))
+	b.Handle(&endpoints.PrevTV,endpoint.PrevPopularTv(b))
+	b.Handle(&endpoints.PopularMovieKey,endpoint.GetPopularMovies(b))
+	b.Handle(&endpoints.NextMovie,endpoint.NextPopularMovie(b))
+	b.Handle(&endpoints.PrevMovie,endpoint.PrevPopularMovie(b))
+	b.Handle(&endpoints.SaveMovie,endpoint.SaveMovie(b))
 
 	b.Start()
 	return nil
