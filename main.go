@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/urfave/cli"
-	tb "gopkg.in/tucnak/telebot.v2"
 	"log"
 	"os"
 	"time"
 
+	"github.com/urfave/cli"
+	tb "gopkg.in/tucnak/telebot.v2"
+
 	"./endpoints"
 )
-
 
 func main() {
 
@@ -44,21 +44,21 @@ func StartBot(d *cli.Context) error {
 	db := endpoints.NewPostgreBot(user)
 	endpoint := endpoints.NewEndpointsFactory(db)
 
-	b.Handle("/start",endpoint.Start(b))
+	b.Handle("/start", endpoint.Start(b))
 	//tv endpoints
-	b.Handle(&endpoints.PopularTvKey,endpoint.GetPopularTv(b))
-	b.Handle(&endpoints.NextTV,endpoint.NextPopularTv(b))
-	b.Handle(&endpoints.PrevTV,endpoint.PrevPopularTv(b))
+	b.Handle(&endpoints.PopularTvKey, endpoint.GetPopularTv(b))
+	b.Handle(&endpoints.NextTV, endpoint.NextPopularTv(b))
+	b.Handle(&endpoints.PrevTV, endpoint.PrevPopularTv(b))
 
 	//movies endpoints
-	b.Handle(&endpoints.PopularMovieKey,endpoint.GetPopularMovies(b))
-	b.Handle(&endpoints.NextMovie,endpoint.NextPopularMovie(b))
-	b.Handle(&endpoints.PrevMovie,endpoint.PrevPopularMovie(b))
-	b.Handle(&endpoints.SaveMovie,endpoint.SaveMovie(b))
-	b.Handle(&endpoints.MyMoviesKey,endpoint.GetMyMovies(b))
-	b.Handle(&endpoints.NextMyMovie,endpoint.NextMyMovie(b))
-	b.Handle(&endpoints.PrevMyMovie,endpoint.PrevMyMovie(b))
-	b.Handle(&endpoints.DeleteMyMovie,endpoint.DeleteMyMovie(b))
+	b.Handle(&endpoints.PopularMovieKey, endpoint.GetPopularMovies(b))
+	b.Handle(&endpoints.NextMovie, endpoint.NextPopularMovie(b))
+	b.Handle(&endpoints.PrevMovie, endpoint.PrevPopularMovie(b))
+	b.Handle(&endpoints.SaveMovie, endpoint.SaveMovie(b))
+	b.Handle(&endpoints.MyMoviesKey, endpoint.GetMyMovies(b))
+	b.Handle(&endpoints.NextMyMovie, endpoint.NextMyMovie(b))
+	b.Handle(&endpoints.PrevMyMovie, endpoint.PrevMyMovie(b))
+	b.Handle(&endpoints.DeleteMyMovie, endpoint.DeleteMyMovie(b))
 	b.Start()
 	return nil
 }

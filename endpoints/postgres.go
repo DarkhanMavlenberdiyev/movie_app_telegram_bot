@@ -16,17 +16,15 @@ func NewPostgreBot(config PostgreConfig) MoviesDb {
 		Addr:     config.Host + ":" + config.Port,
 		User:     config.User,
 		Password: config.Password,
-		Database:"movies",
+		Database: "movies",
 	})
 	return &postgreStore{db: db}
 }
 
 type postgreStore struct {
-	db *pg.DB
+	db     *pg.DB
 	userDb *pg.DB
 }
-
-
 
 func (p postgreStore) UpdateUser(id int, user *UserMovies) (*UserMovies, error) {
 	user.ID = id
@@ -49,12 +47,9 @@ func (p postgreStore) CreateUser(user *UserMovies) (*UserMovies, error) {
 	return user, res
 }
 
-
-
 func (p postgreStore) GetMovie(id int) (*Movie, error) {
 	movie := &Movie{ID: id}
 	err := p.db.Select(movie)
-
 
 	if err != nil {
 		return nil, err
@@ -72,17 +67,18 @@ func (p postgreStore) DeleteMovie(id int) error {
 }
 
 // GetMyMovie ...
-func (p postgreStore) GetMyMovie(userId int) ([]*Movie,error){
+func (p postgreStore) GetMyMovie(userId int) ([]*Movie, error) {
 	var movies []*Movie
-	err := p.db.Model(&movies).Where("user_id=?",userId).Select()
-	if err!=nil {
-		return nil,err
+	err := p.db.Model(&movies).Where("user_id=?", userId).Select()
+	if err != nil {
+		return nil, err
 	}
-	return movies,nil
+	return movies, nil
 }
+
 // DeleteMyMovie ...
-func (p postgreStore) DeleteMyMovie(id int,user_id int) error {
-	movie := &Movie{ID: id,UserID: user_id}
+func (p postgreStore) DeleteMyMovie(id int, user_id int) error {
+	movie := &Movie{ID: id, UserID: user_id}
 	err := p.db.Delete(movie)
 	if err != nil {
 		return err
@@ -90,5 +86,3 @@ func (p postgreStore) DeleteMyMovie(id int,user_id int) error {
 
 	return nil
 }
-
-
