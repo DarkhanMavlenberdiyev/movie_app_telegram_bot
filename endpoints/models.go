@@ -10,7 +10,9 @@ type MoviesDb interface {
 	GetUser(id int)	(*UserMovies,error)
 	CreateUser(user *UserMovies) (*UserMovies,error)
 	UpdateUser(id int,user *UserMovies) (*UserMovies,error)
+
 	GetMyMovie (user_id int) ([]*Movie,error)
+	DeleteMyMovie(id int,user_id int) error
 
 
 }

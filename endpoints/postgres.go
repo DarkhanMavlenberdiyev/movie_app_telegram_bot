@@ -26,6 +26,8 @@ type postgreStore struct {
 	userDb *pg.DB
 }
 
+
+
 func (p postgreStore) UpdateUser(id int, user *UserMovies) (*UserMovies, error) {
 	user.ID = id
 
@@ -69,6 +71,7 @@ func (p postgreStore) DeleteMovie(id int) error {
 	panic("implement me")
 }
 
+// GetMyMovie ...
 func (p postgreStore) GetMyMovie(userId int) ([]*Movie,error){
 	var movies []*Movie
 	err := p.db.Model(&movies).Where("user_id=?",userId).Select()
@@ -76,6 +79,16 @@ func (p postgreStore) GetMyMovie(userId int) ([]*Movie,error){
 		return nil,err
 	}
 	return movies,nil
+}
+// DeleteMyMovie ...
+func (p postgreStore) DeleteMyMovie(id int,user_id int) error {
+	movie := &Movie{ID: id,UserID: user_id}
+	err := p.db.Delete(movie)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 

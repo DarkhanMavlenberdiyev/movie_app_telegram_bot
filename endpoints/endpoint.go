@@ -16,6 +16,8 @@ import (
 var (
 	countTv = 0
 	countMovie = 0
+
+
 	page    = 1
 	tv      = api.TVRate{}
 	movies	= api.MovieRate{}
@@ -43,12 +45,15 @@ var (
 	moviesInline = [][]tb.InlineButton{[]tb.InlineButton{PrevMovie,NextMovie},
 		[]tb.InlineButton{SaveMovie},
 		}
-		
+
+	//My movies
 	NextMyMovie = tb.InlineButton{Text: "Next",Unique: "m1"}	
 	PrevMyMovie = tb.InlineButton{Text: "Previous",Unique: "m2",}
 	DeleteMyMovie = tb.InlineButton{Text: "Delete",Unique: "m3"}
-	myMoviesInline = [][]tb.InlineButton{[]tb.InlineButton{PrevMyMovie,NextMyMovie},[]tb.InlineButton{DeleteMyMovie}}
+	LinkHomepage = tb.InlineButton{Text: "Link",Unique: "m4"}
+	myMoviesInline = [][]tb.InlineButton{[]tb.InlineButton{PrevMyMovie,NextMyMovie},[]tb.InlineButton{DeleteMyMovie,LinkHomepage}}
 	myMovies = []*Movie{}
+	myMoviesCount = 0
 
 )
 const (
@@ -180,7 +185,7 @@ func (ef *endpointsFactory) SaveMovie(b *tb.Bot) func(c *tb.Callback){
 		_,er := ef.movies.CreateMovie(&movie)
 
 		if er != nil {
-			b.Respond(c, &tb.CallbackResponse{Text: er.Error(),ShowAlert: true})
+			b.Respond(c, &tb.CallbackResponse{Text: "There is error:(",ShowAlert: true})
 			return
 		}
 		list,_ := ef.movies.GetUser(c.Sender.ID)
@@ -218,18 +223,58 @@ func (ef *endpointsFactory) GetMyMovies(b *tb.Bot) func(m *tb.Message){
 	return func(m *tb.Message) {
 		res,err := ef.movies.GetMyMovie(m.Sender.ID)
 		myMovies = res
-		if err!=nil {
-			b.Send(m.Sender,"Sorry. There is error :(")
+		if err!=nil || len(myMovies)==0{
+			b.Send(m.Sender,"There is error or your list is empty")
 			return
 		}
-		response := fmt.Sprintf("Title: %v\nRelease-Date: %v\nLink: %v\nOverview: %v",myMovies[0].Title,myMovies[0].ReleaseDate,myMovies[0].Homepage,myMovies[0].Overview)
-		photo := &tb.Photo{File:tb.FromURL(IMG_URL+myMovies[0].BackdropPath),Caption: response}
+		response := fmt.Sprintf("Title: %v\nRelease-Date: %v\nLink: %v\nOverview: %v",myMovies[myMoviesCount].Title,myMovies[myMoviesCount].ReleaseDate,myMovies[myMoviesCount].Homepage,myMovies[myMoviesCount].Overview)
+		photo := &tb.Photo{File:tb.FromURL(IMG_URL+myMovies[myMoviesCount].BackdropPath),Caption: response}
+		LinkHomepage = tb.InlineButton{Text: "Link",Unique: "m4",URL: myMovies[myMoviesCount].Homepage}
+		myMoviesInline[1][1]=LinkHomepage
 		b.Send(m.Sender,photo,&tb.ReplyMarkup{InlineKeyboard: myMoviesInline})
 
 	}
 }
 
+func (ef *endpointsFactory) NextMyMovie(b *tb.Bot) func (c *tb.Callback){
+	return func(c *tb.Callback) {
+		if myMoviesCount< len(myMovies)-1{
+			myMoviesCount++
+			response := fmt.Sprintf("Title: %v\nRelease-Date: %v\nLink: %v\nOverview: %v",myMovies[myMoviesCount].Title,myMovies[myMoviesCount].ReleaseDate,myMovies[myMoviesCount].Homepage,myMovies[myMoviesCount].Overview)
+			photo := &tb.Photo{File:tb.FromURL(IMG_URL+myMovies[myMoviesCount].BackdropPath),Caption: response}
+			LinkHomepage = tb.InlineButton{Text: "Link",Unique: "m4",URL: myMovies[myMoviesCount].Homepage}
+			myMoviesInline[1][1]=LinkHomepage
+			b.Send(c.Sender,photo,&tb.ReplyMarkup{InlineKeyboard: myMoviesInline})
 
+		}
+	}
+}
+
+func (ef *endpointsFactory) PrevMyMovie(b *tb.Bot) func (c *tb.Callback){
+	return func(c *tb.Callback) {
+		if myMoviesCount >0 {
+			myMoviesCount--
+			response := fmt.Sprintf("Title: %v\nRelease-Date: %v\nLink: %v\nOverview: %v",myMovies[myMoviesCount].Title,myMovies[myMoviesCount].ReleaseDate,myMovies[myMoviesCount].Homepage,myMovies[myMoviesCount].Overview)
+			photo := &tb.Photo{File:tb.FromURL(IMG_URL+myMovies[myMoviesCount].BackdropPath),Caption: response}
+			LinkHomepage = tb.InlineButton{Text: "Link",Unique: "m4",URL: myMovies[myMoviesCount].Homepage}
+			myMoviesInline[1][1]=LinkHomepage
+			b.Send(c.Sender,photo,&tb.ReplyMarkup{InlineKeyboard: myMoviesInline})
+
+		}
+	}
+}
+func (ef *endpointsFactory) DeleteMyMovie(b *tb.Bot) func(c *tb.Callback){
+	return func(c *tb.Callback) {
+		err := ef.movies.DeleteMyMovie(myMovies[myMoviesCount].ID,c.Sender.ID)
+		if err != nil {
+			b.Respond(c, &tb.CallbackResponse{Text: "Can't delete movie. Try again!",ShowAlert: true})
+			return
+		}
+		myMovies[myMoviesCount].Title = fmt.Sprintf("Title: %v (Deleted from list)",myMovies[myMoviesCount].Title)
+		b.Respond(c,&tb.CallbackResponse{Text: "Movie deleted successfully!"})
+
+	}
+}
 
 /*
 
