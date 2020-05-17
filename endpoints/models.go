@@ -10,12 +10,13 @@ type MoviesDb interface {
 	GetUser(id int)	(*UserMovies,error)
 	CreateUser(user *UserMovies) (*UserMovies,error)
 	UpdateUser(id int,user *UserMovies) (*UserMovies,error)
+	GetMyMovie (user_id int) ([]*Movie,error)
 
 
 }
 
 type UserMovies struct {
-	ID 				int 	`json:"id"`
+	ID 					int 	`json:"id"`
 	MoviesList			string	`json:"movies_list"`
 }
 
@@ -33,6 +34,7 @@ type Movie struct {
 	ReleaseDate			string 	`json:"release_date"`
 	Status				string 	`json:"status"`
 	VoteCount			int 	`json:"vote_count"`
+	UserID				int 	`json:"user_id"`// fk
 }
 
 type TV struct {

@@ -22,10 +22,11 @@ var (
 
 	PopularTvKey = tb.ReplyButton{Text:"10 popular TV",}
 	PopularMovieKey = tb.ReplyButton{Text:"10 popular Movies",}
+	MyMoviesKey		= tb.ReplyButton{Text: "My movies",}
 	FindKey = tb.ReplyButton{Text:"Find",}
 
 	startReply = [][]tb.ReplyButton{[]tb.ReplyButton{PopularMovieKey,PopularTvKey},
-	[]tb.ReplyButton{FindKey},
+	[]tb.ReplyButton{FindKey,MyMoviesKey},
 	}
 
 
@@ -42,6 +43,12 @@ var (
 	moviesInline = [][]tb.InlineButton{[]tb.InlineButton{PrevMovie,NextMovie},
 		[]tb.InlineButton{SaveMovie},
 		}
+		
+	NextMyMovie = tb.InlineButton{Text: "Next",Unique: "m1"}	
+	PrevMyMovie = tb.InlineButton{Text: "Previous",Unique: "m2",}
+	DeleteMyMovie = tb.InlineButton{Text: "Delete",Unique: "m3"}
+	myMoviesInline = [][]tb.InlineButton{[]tb.InlineButton{PrevMyMovie,NextMyMovie},[]tb.InlineButton{DeleteMyMovie}}
+	myMovies = []*Movie{}
 
 )
 const (
@@ -54,6 +61,7 @@ func NewEndpointsFactory(movie MoviesDb) *endpointsFactory {
 
 type endpointsFactory struct {
 	movies 		MoviesDb
+	users 		UserMovies
 }
 
 
@@ -125,7 +133,7 @@ func (ef *endpointsFactory) PrevPopularTv(b *tb.Bot) func (c *tb.Callback){
 
 func (ef *endpointsFactory) GetPopularMovies(b *tb.Bot) func(m *tb.Message){
 	return func(m *tb.Message) {
-
+		countMovie = 0
 		req,_ := http.Get(fmt.Sprintf("https://api.themoviedb.org/3/movie/popular?api_key=%v&language=en-US&page=%v",API_KEY,page))
 		reqData,_ := ioutil.ReadAll(req.Body)
 		json.Unmarshal(reqData,&movies)
@@ -154,7 +162,7 @@ func (ef *endpointsFactory) PrevPopularMovie(b *tb.Bot) func (c *tb.Callback){
 	return func(c *tb.Callback) {
 		if countMovie >0 {
 			countMovie--
-			res := fmt.Sprintf("Place: #%v\nTitle: %v\nPopularity: %v\nRelease date: %v", countTv+1,movies.Results[countMovie].Title,movies.Results[countMovie].Popularity,movies.Results[countMovie].ReleaseDate)
+			res := fmt.Sprintf("Place: #%v\nTitle: %v\nPopularity: %v\nRelease date: %v", countMovie+1,movies.Results[countMovie].Title,movies.Results[countMovie].Popularity,movies.Results[countMovie].ReleaseDate)
 			photo := &tb.Photo{File: tb.FromURL(IMG_URL+movies.Results[countMovie].BackdropPath),Caption:res}
 			b.Send(c.Sender,photo,&tb.ReplyMarkup{InlineKeyboard:moviesInline})
 		}
@@ -166,6 +174,7 @@ func (ef *endpointsFactory) SaveMovie(b *tb.Bot) func(c *tb.Callback){
 		req, _ := http.Get(fmt.Sprintf("https://api.themoviedb.org/3/movie/%v?api_key=%v&language=en-US",movies.Results[countMovie].ID,API_KEY))
 		reqData,_ := ioutil.ReadAll(req.Body)
 		movie := Movie{}
+		movie.UserID = c.Sender.ID
 		json.Unmarshal(reqData,&movie)
 
 		_,er := ef.movies.CreateMovie(&movie)
@@ -204,6 +213,20 @@ func contains(s []string, e string) bool {
 		}
 	}
 	return false
+}
+func (ef *endpointsFactory) GetMyMovies(b *tb.Bot) func(m *tb.Message){
+	return func(m *tb.Message) {
+		res,err := ef.movies.GetMyMovie(m.Sender.ID)
+		myMovies = res
+		if err!=nil {
+			b.Send(m.Sender,"Sorry. There is error :(")
+			return
+		}
+		response := fmt.Sprintf("Title: %v\nRelease-Date: %v\nLink: %v\nOverview: %v",myMovies[0].Title,myMovies[0].ReleaseDate,myMovies[0].Homepage,myMovies[0].Overview)
+		photo := &tb.Photo{File:tb.FromURL(IMG_URL+myMovies[0].BackdropPath),Caption: response}
+		b.Send(m.Sender,photo,&tb.ReplyMarkup{InlineKeyboard: myMoviesInline})
+
+	}
 }
 
 

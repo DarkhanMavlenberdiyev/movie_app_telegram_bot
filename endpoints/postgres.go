@@ -23,6 +23,7 @@ func NewPostgreBot(config PostgreConfig) MoviesDb {
 
 type postgreStore struct {
 	db *pg.DB
+	userDb *pg.DB
 }
 
 func (p postgreStore) UpdateUser(id int, user *UserMovies) (*UserMovies, error) {
@@ -52,6 +53,7 @@ func (p postgreStore) GetMovie(id int) (*Movie, error) {
 	movie := &Movie{ID: id}
 	err := p.db.Select(movie)
 
+
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +67,15 @@ func (p postgreStore) CreateMovie(movie *Movie) (*Movie, error) {
 
 func (p postgreStore) DeleteMovie(id int) error {
 	panic("implement me")
+}
+
+func (p postgreStore) GetMyMovie(userId int) ([]*Movie,error){
+	var movies []*Movie
+	err := p.db.Model(&movies).Where("user_id=?",userId).Select()
+	if err!=nil {
+		return nil,err
+	}
+	return movies,nil
 }
 
 

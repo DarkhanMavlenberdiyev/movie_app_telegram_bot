@@ -52,6 +52,7 @@ func StartBot(d *cli.Context) error {
 	b.Handle(&endpoints.NextMovie,endpoint.NextPopularMovie(b))
 	b.Handle(&endpoints.PrevMovie,endpoint.PrevPopularMovie(b))
 	b.Handle(&endpoints.SaveMovie,endpoint.SaveMovie(b))
+	b.Handle(&endpoints.MyMoviesKey,endpoint.GetMyMovies(b))
 
 	b.Start()
 	return nil
