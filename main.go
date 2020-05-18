@@ -59,6 +59,12 @@ func StartBot(d *cli.Context) error {
 	b.Handle(&endpoints.PopularTvKey, endpointTv.GetPopularTv(b))
 	b.Handle(&tv.NextTV, endpointTv.NextPopularTv(b))
 	b.Handle(&tv.PrevTV, endpointTv.PrevPopularTv(b))
+	b.Handle(&tv.SaveTV,endpointTv.SaveTv(b))
+	// My TV endpoints
+	b.Handle(&endpoints.MyTvKey,endpointTv.GetMyTv(b))
+	b.Handle(&tv.NextMyTv,endpointTv.NextMyTv(b))
+	b.Handle(&tv.PrevMyTv,endpointTv.PrevMyTv(b))
+	b.Handle(&tv.DeleteMyTv,endpointTv.DeleteMyTv(b))
 
 	// Movies endpoints
 	b.Handle(&endpoints.PopularMovieKey, endpointMovie.GetPopularMovies(b))

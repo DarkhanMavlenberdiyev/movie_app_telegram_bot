@@ -56,5 +56,11 @@ func (p postgreStore) GetMyTv(user_id int) ([]*TV, error) {
 }
 // DeleteMyTv...
 func (p postgreStore) DeleteMyTv(id int, user_id int) error {
-	panic("implement me")
+	tv := &TV{ID: id, UserID: user_id}
+	err := p.db.Delete(tv)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

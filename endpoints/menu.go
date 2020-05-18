@@ -6,10 +6,10 @@ var(
 	PopularTvKey    = tb.ReplyButton{Text: "10 popular TV"}
 	PopularMovieKey = tb.ReplyButton{Text: "10 popular Movies"}
 	MyMoviesKey     = tb.ReplyButton{Text: "My movies"}
-	FindKey         = tb.ReplyButton{Text: "Find"}
+	MyTvKey         = tb.ReplyButton{Text: "My TV"}
 
 	startReply = [][]tb.ReplyButton{[]tb.ReplyButton{PopularMovieKey, PopularTvKey},
-		[]tb.ReplyButton{FindKey, MyMoviesKey},
+		[]tb.ReplyButton{MyTvKey, MyMoviesKey},
 	}
 )
 
