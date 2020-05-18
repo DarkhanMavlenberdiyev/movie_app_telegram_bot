@@ -7,8 +7,10 @@ import (
 
 	"github.com/urfave/cli"
 	tb "gopkg.in/tucnak/telebot.v2"
-
 	"./endpoints"
+	"./endpoints/movie"
+	"./endpoints/tv"
+
 )
 
 func main() {
@@ -35,30 +37,39 @@ func StartBot(d *cli.Context) error {
 		log.Fatal(err)
 		return err
 	}
-	user := endpoints.PostgreConfig{
+	userMovie := movie.PostgreConfig{
 		User:     "postgres",
 		Password: "daha2000",
 		Port:     "5432", //5432
 		Host:     "127.0.0.1",
 	}
-	db := endpoints.NewPostgreBot(user)
-	endpoint := endpoints.NewEndpointsFactory(db)
+	userTv := tv.PostgreConfig{
+		User:     "postgres",
+		Password: "daha2000",
+		Port:     "5432", //5432
+		Host:     "127.0.0.1",
+	}
+	dbMovie := movie.PostgreMovies(userMovie)
+	dbTv := tv.PostgreTv(userTv)
+	endpointMovie := movie.NewEndpointsFactory(dbMovie)
+	endpointTv := tv.NewEndpointsFactoryTv(dbTv)
 
-	b.Handle("/start", endpoint.Start(b))
-	//tv endpoints
-	b.Handle(&endpoints.PopularTvKey, endpoint.GetPopularTv(b))
-	b.Handle(&endpoints.NextTV, endpoint.NextPopularTv(b))
-	b.Handle(&endpoints.PrevTV, endpoint.PrevPopularTv(b))
+	b.Handle("/start", endpoints.Start(b))
+	// Tv endpoints
+	b.Handle(&endpoints.PopularTvKey, endpointTv.GetPopularTv(b))
+	b.Handle(&tv.NextTV, endpointTv.NextPopularTv(b))
+	b.Handle(&tv.PrevTV, endpointTv.PrevPopularTv(b))
 
-	//movies endpoints
-	b.Handle(&endpoints.PopularMovieKey, endpoint.GetPopularMovies(b))
-	b.Handle(&endpoints.NextMovie, endpoint.NextPopularMovie(b))
-	b.Handle(&endpoints.PrevMovie, endpoint.PrevPopularMovie(b))
-	b.Handle(&endpoints.SaveMovie, endpoint.SaveMovie(b))
-	b.Handle(&endpoints.MyMoviesKey, endpoint.GetMyMovies(b))
-	b.Handle(&endpoints.NextMyMovie, endpoint.NextMyMovie(b))
-	b.Handle(&endpoints.PrevMyMovie, endpoint.PrevMyMovie(b))
-	b.Handle(&endpoints.DeleteMyMovie, endpoint.DeleteMyMovie(b))
+	// Movies endpoints
+	b.Handle(&endpoints.PopularMovieKey, endpointMovie.GetPopularMovies(b))
+	b.Handle(&movie.NextMovie, endpointMovie.NextPopularMovie(b))
+	b.Handle(&movie.PrevMovie, endpointMovie.PrevPopularMovie(b))
+	b.Handle(&movie.SaveMovie, endpointMovie.SaveMovie(b))
+	// My movies endpoints
+	b.Handle(&endpoints.MyMoviesKey, endpointMovie.GetMyMovies(b))
+	b.Handle(&movie.NextMyMovie, endpointMovie.NextMyMovie(b))
+	b.Handle(&movie.PrevMyMovie, endpointMovie.PrevMyMovie(b))
+	b.Handle(&movie.DeleteMyMovie, endpointMovie.DeleteMyMovie(b))
 	b.Start()
 	return nil
 }
